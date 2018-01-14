@@ -3,9 +3,23 @@
 #include <math.h>
 #include <algorithm>
 #include "dds.h"
-#include "csv.h"
 
 float const MATH_PI = 3.14159f;
+
+void ExportTable(char const* name, float* lutData, unsigned lutWidth, unsigned lutHeight)
+{
+	FILE* f = fopen(name, "w");
+	for (unsigned y = 0; y < lutHeight; ++y)
+	{
+		for (unsigned x = 0; x < lutWidth; ++x)
+		{
+			float const ndotv = (x + 0.5f) / lutWidth;
+			float const roughness = (y + 0.5f) / lutHeight;
+			fprintf(f, "%f, %f, %f\n", ndotv, roughness, lutData[x * 4 + y * lutWidth * 4] );
+		}
+	}
+	fclose(f);
+}
 
 float Saturate(float x)
 {
@@ -162,10 +176,8 @@ int main()
 		}
 	}
 
-	SaveCSV("roughness.csv", LUT_WIDTH);
-	SaveCSV("ndotv.csv", LUT_HEIGHT);
-	SaveCSV("whiteFurnace.csv", lutWhiteFurnace, LUT_WIDTH, LUT_HEIGHT);
-	SaveCSV("lutWeakWhiteFurnace.csv", lutWeakWhiteFurnace, LUT_WIDTH, LUT_HEIGHT);
+	ExportTable("whiteFurnace.txt", lutWhiteFurnace, LUT_WIDTH, LUT_HEIGHT);
+	ExportTable("lutWeakWhiteFurnace.txt", lutWeakWhiteFurnace, LUT_WIDTH, LUT_HEIGHT);
 
 	SaveDDS("whiteFurnace.dds", DDS_FORMAT_R32G32B32A32_FLOAT, 16, LUT_WIDTH, LUT_HEIGHT, lutWhiteFurnace);
 	SaveDDS("weakWhiteFurnace.dds", DDS_FORMAT_R32G32B32A32_FLOAT, 16, LUT_WIDTH, LUT_HEIGHT, lutWeakWhiteFurnace);
